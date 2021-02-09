@@ -62,7 +62,7 @@ void mx_chdir(t_shell *shell) {
     }
 
     if (quote % 2 != 0) {
-        printf("quote doesn't close\n\r");
+        fprintf(stderr, "Odd number of quotes.\n");
         mx_free_words(words);
         free(cd);
         shell->exit_code = EXIT_FAILURE;
@@ -133,18 +133,18 @@ void mx_chdir(t_shell *shell) {
                     }
                 }
                 if (prev_path) {
-                    printf("%s\n\r", prev_path);
+                    printf("%s\n", prev_path);
                     mx_strdel(&prev_path);
                     prev_path = mx_strdup(oldpwd);
                 }
                 else {
                     prev_path = mx_strdup(oldpwd);
-                    printf("%s\n\r", prev_path);
+                    printf("%s\n", prev_path);
                 }
             }
             else {
                 prev_path = mx_strdup("/");
-                printf("%s\n\r", prev_path);
+                printf("%s\n", prev_path);
             }
             mx_strdel(&destination);
             destination = strdup(prev_path);
@@ -201,7 +201,7 @@ void mx_chdir(t_shell *shell) {
         setenv("PWD", destination, 1);
     }
     else {
-        printf("ush: chdir: %s: No such file or directory\n\r", path);
+        fprintf(stderr, "ush: chdir: %s: No such file or directory\n", path);
         mx_strdel(&path);
         mx_strdel(&destination);
         mx_free_words(path_split);

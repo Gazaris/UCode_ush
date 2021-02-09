@@ -64,18 +64,18 @@ char *mx_find_destination(char *path, char *p) {
                     }
                 }
                 if (prev_path) {
-                    printf("%s\n\r", prev_path);
+                    printf("%s\n", prev_path);
                     mx_strdel(&prev_path);
                     prev_path = mx_strdup(oldpwd);
                 }
                 else {
                     prev_path = mx_strdup(oldpwd);
-                    printf("%s\n\r", prev_path);
+                    printf("%s\n", prev_path);
                 }
             }
             else {
                 prev_path = mx_strdup("/");
-                printf("%s\n\r", prev_path);
+                printf("%s\n", prev_path);
             }
             mx_strdel(&destination);
             destination = strdup(prev_path);

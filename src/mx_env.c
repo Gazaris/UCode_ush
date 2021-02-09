@@ -56,11 +56,11 @@ void mx_env(t_shell *shell) {
     int flags = 0;
     check_flags(words, env, &flags);
 
-    char *usage = "usage: env [-iv] [-P utilpath] [-u name]\n\r\
-           [name=value ...] [utility [argument ...]]\n\r";
+    char *usage = "usage: env [-iv] [-P utilpath] [-u name]\n\
+           [name=value ...] [utility [argument ...]]\n";
 
     if (flags == -1) {
-        printf("env: illegal option -- %c\n\r%s", words[1][1], usage);
+        fprintf(stderr, "env: illegal option -- %c\n%s", words[1][1], usage);
         mx_free_words(words);
         free(env);
         shell->exit_code = EXIT_FAILURE;
@@ -174,7 +174,7 @@ void mx_env(t_shell *shell) {
                             else if (words[i][j] == '}') {
                                 brace2++;
                                 if (brace1 != brace2 && words[i][j + 1] != '}') {
-                                    printf("zsh: bad substitution\n\r");
+                                    fprintf(stderr, "zsh: bad substitution\n");
                                     mx_strdel(&dollar_sequense);
                                     mx_strdel(&var);
                                     mx_strdel(&val);
@@ -192,7 +192,7 @@ void mx_env(t_shell *shell) {
                             else if (words[i][j] == ')') {
                                 bracket2++;
                                 if (bracket1 != bracket2 && words[i][j + 1] != ')') {
-                                    printf("zsh: bad substitution\n\r");
+                                    fprintf(stderr, "zsh: bad substitution\n");
                                     mx_strdel(&dollar_sequense);
                                     mx_strdel(&var);
                                     mx_strdel(&val);
@@ -235,7 +235,7 @@ void mx_env(t_shell *shell) {
                 }
             }
             if (quote % 2 == 0) {
-                // printf("%s -> %s\n\r", var, val);  // for test
+                // printf("%s -> %s\n", var, val);  // for test
                 if (!val) val = strdup("");
                 setenv(var, val, 1);
                 a += skip_spaces;
@@ -262,7 +262,7 @@ void mx_env(t_shell *shell) {
             }
         }
         if (quote % 2 != 0) {
-            printf("quote doesn't close\n\r");
+            fprintf(stderr, "Odd number of quotes.\n");
             mx_free_words(new_vars);
             mx_free_words(words);
             free(env);
@@ -277,7 +277,7 @@ void mx_env(t_shell *shell) {
         while (words[++words_count]);
         words_count--;
         if (flags == words_count) {
-            printf("env: option requires an argument -- P\n\r%s", usage);
+            fprintf(stderr, "env: option requires an argument -- P\n%s", usage);
             mx_free_words(new_vars);
             mx_free_words(words);
             free(env);
@@ -293,7 +293,7 @@ void mx_env(t_shell *shell) {
         while (words[++words_count]);
         words_count--;
         if (flags == words_count) {
-            printf("env: option requires an argument -- u\n\r%s", usage);
+            fprintf(stderr, "env: option requires an argument -- u\n%s", usage);
             mx_free_words(new_vars);
             mx_free_words(words);
             free(env);
@@ -341,7 +341,7 @@ void mx_env(t_shell *shell) {
                 }
             }
             if (is_new)
-                printf("%s\n\r", vars[i]);
+                printf("%s\n", vars[i]);
         }
         if (new_vars)
             for (int i = 0; new_vars[i]; i++)

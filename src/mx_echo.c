@@ -79,19 +79,19 @@ void mx_echo(t_shell *shell) {
         return;
     }
     if (strcmp(words[flags + 1], "~") == 0 && !words[flags + 2]) {
-        printf("%s\n\r", getenv("HOME"));
+        printf("%s\n", getenv("HOME"));
         mx_free_words(words);
         free(echo);
         return;
     }
     if (strcmp(words[flags + 1], "~+") == 0 && !words[flags + 2]) {
-        printf("%s\n\r", getenv("PWD"));
+        printf("%s\n", getenv("PWD"));
         mx_free_words(words);
         free(echo);
         return;
     }
     if (strcmp(words[flags + 1], "~-") == 0 && !words[flags + 2]) {
-        printf("%s\n\r", getenv("OLDPWD"));
+        printf("%s\n", getenv("OLDPWD"));
         mx_free_words(words);
         free(echo);
         return;
@@ -177,7 +177,7 @@ void mx_echo(t_shell *shell) {
                 else if (words[i][j] == '}') {
                     brace2++;
                     if (brace1 != brace2 && words[i][j + 1] != '}') {
-                        printf("zsh: bad substitution\n\r");
+                        fprintf(stderr, "zsh: bad substitution\n");
                         mx_strdel(&result);
                         mx_strdel(&dollar_sequense);
                         mx_free_words(words);
@@ -194,7 +194,7 @@ void mx_echo(t_shell *shell) {
                 else if (words[i][j] == ')') {
                     bracket2++;
                     if (bracket1 != bracket2 && words[i][j + 1] != ')') {
-                        printf("ush: parse error near `)'\n\r");
+                        fprintf(stderr, "ush: parse error near `)'\n");
                         mx_strdel(&result);
                         mx_strdel(&dollar_sequense);
                         mx_free_words(words);
@@ -228,11 +228,14 @@ void mx_echo(t_shell *shell) {
             result = mx_strrejoin(result, p);
             printable = true;
         }
-        if (words[i + 1])
+        if (words[i + 1]) {
+            if (backslash == 1)
+                backslash = 0;
             result = mx_strrejoin(result, " ");
+        }
     }
     if (quote % 2 != 0) {
-        printf("quote doesn't close\n\r");
+        printf("Odd number of quotes.\n");
         mx_free_words(words);
         mx_strdel(&result);
         free(echo);
@@ -245,7 +248,7 @@ void mx_echo(t_shell *shell) {
     if (printable) {
         if (echo->n)
             printf("%s%s%%%s", MX_BLACK_F, MX_WHITE_B, MX_RESET);
-        printf("\n\r");
+        printf("\n");
     }
 
     mx_strdel(&result);

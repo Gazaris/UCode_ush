@@ -67,7 +67,7 @@ void mx_which(t_shell *shell) {
     words_split[k] = NULL;
     mx_free_words(words);
     if (quote % 2 != 0) {
-        printf("quote doesn't close\n\r");
+        fprintf(stderr, "Odd number of quotes.\n");
         mx_free_words(words_split);
         free(which);
         shell->exit_code = EXIT_FAILURE;
@@ -96,7 +96,7 @@ void mx_which(t_shell *shell) {
             if (strcmp(words[i], builtins[j]) == 0) {
                 exists = true;
                 if (!which->s)
-                    printf("%s: shell built-in command\n\r", words[i]);
+                    fprintf(stderr, "%s: shell built-in command\n", words[i]);
                 break;
             }
         }
@@ -110,7 +110,7 @@ void mx_which(t_shell *shell) {
                 if (strcmp(dirent->d_name, words[i]) == 0 && words[i][0] != '.') {
                     exists = true;
                     if (!which->s)
-                        printf("%s/%s\n\r", path_split[j], dirent->d_name);
+                        printf("%s/%s\n", path_split[j], dirent->d_name);
                     if (!which->a)
                         break;
                 }
@@ -122,18 +122,18 @@ void mx_which(t_shell *shell) {
         if (!exists) {
             all_exists = false;
             // if (!which->s)
-                printf("%s not found\n\r", words[i]);
+                fprintf(stderr, "%s not found\n", words[i]);
         }
     }
     if (all_exists) {
         shell->exit_code = EXIT_SUCCESS;
         if (which->s){}
-            // printf("1\n\r");
+            // printf("1\n");
     }
     else {
         shell->exit_code = EXIT_FAILURE;
         if (which->s){}
-            // printf("0\n\r");
+            // printf("0\n");
     }
     mx_free_words(words);
     mx_free_words(path_split);

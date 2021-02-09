@@ -4,7 +4,7 @@ void mx_unset(t_shell *shell) {
     char **words = mx_strsplit(shell->command_now, ' ');
 
     if (!words[1]) {
-        printf("unset: not enough arguments\n\r");
+        fprintf(stderr, "unset: not enough arguments\n");
         mx_free_words(words);
         shell->exit_code = EXIT_FAILURE;
         return;

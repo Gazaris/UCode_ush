@@ -2,11 +2,8 @@
 
 void mx_print_error(char *command, char *error) {
     mx_printerr("ush: ");
-    if (error) {
-        mx_printerr(command);
-        mx_printerr(error);
-        mx_printerr("\n\r");
-    }
+    if (error)
+        fprintf(stderr, "%s%s\n", command, error);
     else
         perror(command);
 }

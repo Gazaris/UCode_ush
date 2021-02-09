@@ -165,7 +165,7 @@ void mx_alias(t_shell *shell) {
     t_key_value *copy = shell->aliases;
     if(!words[1]) {
         while(copy) {
-            printf("%s=%s\n\r", copy->name, copy->value);
+            printf("%s=%s\n", copy->name, copy->value);
             copy = copy->next;
         }
         mx_free_words(words);
@@ -252,7 +252,7 @@ void mx_alias(t_shell *shell) {
                         else if (words[i][j] == '}') {
                             brace2++;
                             if (brace1 != brace2 && words[i][j + 1] != '}') {
-                                printf("zsh: bad substitution\n\r");
+                                fprintf(stderr, "zsh: bad substitution\n");
                                 mx_strdel(&dollar_sequense);
                                 mx_strdel(&var);
                                 mx_strdel(&val);
@@ -289,7 +289,7 @@ void mx_alias(t_shell *shell) {
             }
         }
         if (quote % 2 == 0) {
-            // printf("%s -> %s\n\r", var, val);  // for test
+            // printf("%s -> %s\n", var, val);  // for test
             if (!val) val = strdup("");
             alias_push(shell, var, val);
             valid = true;
@@ -300,7 +300,7 @@ void mx_alias(t_shell *shell) {
         }
     }
     if (quote % 2 != 0) {
-        printf("quote doesn't close\n\r");
+        fprintf(stderr, "Odd number of quotes.\n");
         mx_free_words(words);
         shell->exit_code = EXIT_FAILURE;
         return;
@@ -333,7 +333,7 @@ void mx_alias(t_shell *shell) {
             // while(copy->next != NULL) {
             //     copy = copy->next;
             // }
-            // printf("value = %s\n\rname = %s\n\r", copy->value, copy->name);
+            // printf("value = %s\nname = %s\n", copy->value, copy->name);
             valid = true;
             break;
         }

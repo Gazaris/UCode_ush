@@ -92,13 +92,13 @@ static int add_node(t_shell *shell, int pid, char **line) {
 
 void mx_command_handler(t_shell *shell) {
     if (!shell->line) {
-        printf("\n\r");
+        printf("\n");
         return;
     }
     char **words = mx_strsplit(shell->line, ' ');
     if (!words) {
         mx_free_words(words);
-        printf("\n\r");
+        printf("\n");
         return;
     }
     mx_free_words(words);
@@ -213,13 +213,13 @@ void mx_command_handler(t_shell *shell) {
     t_list *operator = operators_queue;
     bool exec_next = true;
     if (!list)
-        printf("\n\r");
+        printf("\n");
     for (int num = 0; list && exec_next; list = list->next, operator = operator->next, num++) {
         shell->command_now = strdup(list->data);
         words = mx_strsplit(shell->command_now, ' ');
 
         if (shell->new_line && !num)
-            printf("\n\r");
+            printf("\n");
         int words_count = 0;
         while (words[++words_count]);
         t_key_value *copy = shell->aliases;
@@ -269,7 +269,7 @@ void mx_command_handler(t_shell *shell) {
                         functions[i](shell);
                         char *txtcopy = strdup(mx_get_job_args(shell));
                         delete_node(shell, pid);
-                        printf("[%d]  %c done       %s\n\r%s", *f, '+', txtcopy, MX_USH);
+                        printf("[%d]  %c done       %s\n", *f, '+', txtcopy);
                         free(txtcopy);
                         exit(shell->exit_code);
                     }
@@ -278,7 +278,7 @@ void mx_command_handler(t_shell *shell) {
                     }
                     else /* Main process */ {
                         while (*f < 0);
-                        printf("[%d] %d\n\r", *(shell->jobs_counter), pid);
+                        printf("[%d] %d\n", *(shell->jobs_counter), pid);
                         break;
                     }
                 }
@@ -292,7 +292,7 @@ void mx_command_handler(t_shell *shell) {
                 break;
             }
             else if (i == MX_BUILTINS_COUNT - 1) {
-                // printf("ush: command not found: %s\n\r", words[0]);
+                // printf("ush: command not found: %s\n", words[0]);
                 // shell->exit_code = EXIT_FAILURE;
                 mx_launch_other_builtin(shell);
             }

@@ -39,12 +39,41 @@ void mx_cd(t_shell *shell) {
         path = strdup("~");
     }
 
+    int backslash = 0;
     int quote = 0;
     bool end = false;
 
     char p[2];
     for (int i = flags + 1; words[i] && !end; i++) {
         for (int j = 0; words[i][j] && !end; j++) {
+            if (words[i][j] == '\\') {
+                if (backslash < 2)
+                    backslash++;
+                if (backslash == 2 && (!words[i][j + 1])) {
+                    backslash = 0;
+                    path = mx_strrejoin(path, "\\");
+                }
+                continue;
+            }
+            if (backslash == 2 || (quote == 1 && backslash == 1)) {
+                path = mx_strrejoin(path, "\\");
+                MX_C_TO_P(words[i][j], p);
+                path = mx_strrejoin(path, p);
+                backslash = 0;
+                continue;
+            }
+            if (words[i][j] == '"' || words[i][j] == '\'') {
+                if (backslash == 1) {
+                    MX_C_TO_P(words[i][j], p);
+                    path = mx_strrejoin(path, p);
+                    backslash = 0;
+                    continue;
+                }
+                else {
+                    quote++;
+                    continue;
+                }
+            }
             if (words[i][j] == '"' || words[i][j] == '\'') {
                 if (quote < 2) {
                     quote++;
@@ -55,17 +84,16 @@ void mx_cd(t_shell *shell) {
             MX_C_TO_P(words[i][j], p);
             path = mx_strrejoin(path, p);
         }
-        if (quote == 0)
+        if (quote == 0 && !backslash)
             break;
-        if (words[i + 1])
+        if ((words[i + 1] && backslash) || quote == 1) {
+            backslash = 0;
             path = mx_strrejoin(path, " ");
-        /* Тут происходит не баг а фича, 
-           когда в строке несколько пробелов подряд, то засчитывается только один. 
-           Исправлять не собираюсь, и так сойдет :) */
+        }
     }
 
     if (quote % 2 != 0) {
-        printf("quote doesn't close\n\r");
+        fprintf(stderr, "Odd number of quotes.\n");
         mx_free_words(words);
         free(cd);
         shell->exit_code = EXIT_FAILURE;
@@ -135,18 +163,18 @@ void mx_cd(t_shell *shell) {
                     }
                 }
                 if (prev_path) {
-                    printf("%s\n\r", prev_path);
+                    printf("%s\n", prev_path);
                     mx_strdel(&prev_path);
                     prev_path = mx_strdup(oldpwd);
                 }
                 else {
                     prev_path = mx_strdup(oldpwd);
-                    printf("%s\n\r", prev_path);
+                    printf("%s\n", prev_path);
                 }
             }
             else {
                 prev_path = mx_strdup("/");
-                printf("%s\n\r", prev_path);
+                printf("%s\n", prev_path);
             }
             mx_strdel(&destination);
             destination = strdup(prev_path);
@@ -204,7 +232,7 @@ void mx_cd(t_shell *shell) {
         setenv("PWD", destination, 1);
     }
     else {
-        printf("ush: cd: %s: No such file or directory\n\r", path);
+        fprintf(stderr, "ush: cd: %s: No such file or directory\n", path);
         mx_strdel(&path);
         mx_strdel(&destination);
         mx_free_words(path_split);

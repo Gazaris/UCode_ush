@@ -37,14 +37,14 @@ void mx_pwd(t_shell *shell) {
     int flags = 0;
     check_flags(words, pwd, &flags);
     if (flags == -1) {
-        printf("pwd: bad option: %s\n\r", words[1]);
+        fprintf(stderr, "pwd: bad option: %s\n", words[1]);
         mx_free_words(words);
         free(pwd);
         shell->exit_code = EXIT_FAILURE;
         return;
     }
     if (flags == -2) {
-        printf("pwd: too many arguments\n\r");
+        fprintf(stderr, "pwd: too many arguments\n");
         mx_free_words(words);
         free(pwd);
         shell->exit_code = EXIT_FAILURE;
@@ -53,7 +53,7 @@ void mx_pwd(t_shell *shell) {
 
     if (pwd->P)
         var_value = realpath(var_value, NULL);
-    printf("%s\n\r", var_value);
+    printf("%s\n", var_value);
     mx_free_words(words);
     if (pwd->P)
         free(var_value);

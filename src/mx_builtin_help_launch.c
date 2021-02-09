@@ -1,6 +1,9 @@
 #include "ush.h"
 
 bool mx_help_launch_builtin(t_shell *shell, char **job_path, char ***argv) {
+    char *path = getenv("PATH");
+    if (!path)
+        return false;
     char **arr = mx_strsplit(getenv("PATH"), ':');
     char **words = mx_strsplit(shell->command_now, ' ');
     *argv = malloc(sizeof(char**));
@@ -74,9 +77,10 @@ bool mx_help_launch_builtin(t_shell *shell, char **job_path, char ***argv) {
     (*argv)[words_count] = NULL;
     mx_free_words(words);
     if (quote % 2 != 0) {
-        printf("quote doesn't close\n\r");
+        fprintf(stderr, "Odd number of quotes.\n");
         mx_strdel(&result);
         mx_free_words(*argv);
+        *argv = NULL;
         exit(EXIT_FAILURE);
         return false;
     }

@@ -77,8 +77,10 @@ static void save_command(t_shell *shell) {
 }
 
 static void *read_char(t_shell *shell) {
+    struct termios tty_backup_my;
     char c, p[2];
     if (!isatty(0)) {
+        tcsetattr(STDIN_FILENO, TCSANOW, &shell->backup);
         while (true) {
             c = getchar();
             if (c == 10 || c == -1)
@@ -98,24 +100,33 @@ static void *read_char(t_shell *shell) {
         case MX_CTRL_D:
             if (shell->line)
                 return NULL;
-            printf("\n\r");
+            tcgetattr(STDIN_FILENO, &tty_backup_my);  
+            tcsetattr(STDIN_FILENO, TCSANOW, &shell->backup);
+            printf("\n");
+            tcsetattr(STDIN_FILENO, TCSANOW, &tty_backup_my);
             return "\1";
         case MX_CTRL_C:
+            tcgetattr(STDIN_FILENO, &tty_backup_my);  
+            tcsetattr(STDIN_FILENO, TCSANOW, &shell->backup);
             free_command(shell);;
-            printf("\n\r%s", MX_USH);
+            printf("\n%s", MX_USH);
+            tcsetattr(STDIN_FILENO, TCSANOW, &tty_backup_my);
             break;
         case MX_ENTER:
+            tcgetattr(STDIN_FILENO, &tty_backup_my);  
+            tcsetattr(STDIN_FILENO, TCSANOW, &shell->backup);
             save_command(shell);
             copy_history(shell);
             mx_command_handler(shell);
             free_command(shell);
             printf("%s", MX_USH);
+            tcsetattr(STDIN_FILENO, TCSANOW, &tty_backup_my);
             break;
         case MX_BACKSPACE:
             backspace(shell);
             break;
         case MX_TAB:
-            printf("%d", 0);
+            printf("\t");
             break;
         case '\033':
             getchar();

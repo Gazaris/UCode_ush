@@ -13,7 +13,7 @@ void mx_kill(t_shell *shell) {
         int res = kill(id, 9);
         if (res < 0) {
             valid = false;
-            printf("kill: kill %d failed: no such process\n\r", id);
+            fprintf(stderr, "kill: kill %d failed: no such process\n", id);
         }
     }
     if (valid)

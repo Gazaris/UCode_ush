@@ -45,7 +45,7 @@ void mx_export(t_shell *shell) {
                 fp = true;
             }
             else {
-                printf("export: bad option: %s\n\r", words[1]);
+                fprintf(stderr, "export: bad option: %s\n", words[1]);
                 mx_free_words(words);
                 shell->exit_code = EXIT_FAILURE;
                 return;
@@ -134,7 +134,7 @@ void mx_export(t_shell *shell) {
                                 else if (words[i][j] == '}') {
                                     brace2++;
                                     if (brace1 != brace2 && words[i][j + 1] != '}') {
-                                        printf("ush: bad substitution\n\r");
+                                        fprintf(stderr, "ush: bad substitution\n");
                                         mx_strdel(&dollar_sequense);
                                         mx_strdel(&var);
                                         mx_strdel(&val);
@@ -151,7 +151,7 @@ void mx_export(t_shell *shell) {
                                 else if (words[i][j] == ')') {
                                     bracket2++;
                                     if (bracket1 != bracket2 && words[i][j + 1] != ')') {
-                                        printf("ush: parse error near `)'\n\r");
+                                        fprintf(stderr, "ush: parse error near `)'\n");
                                         mx_strdel(&dollar_sequense);
                                         mx_strdel(&var);
                                         mx_strdel(&val);
@@ -192,7 +192,7 @@ void mx_export(t_shell *shell) {
                     }
                 }
                 if (quote % 2 == 0) {
-                    // printf("%s -> %s\n\r", var, val);  // for test
+                    // printf("%s -> %s\n", var, val);  // for test
                     if (!val) val = strdup("");
                     setenv(var, val, 1);
                     mx_strdel(&var);
@@ -202,7 +202,7 @@ void mx_export(t_shell *shell) {
                 }
             }
             if (quote % 2 != 0) {
-                printf("quote doesn't close\n\r");
+                fprintf(stderr, "Odd number of quotes.\n");
                 mx_free_words(words);
                 shell->exit_code = EXIT_FAILURE;
                 return;
@@ -225,7 +225,7 @@ void mx_export(t_shell *shell) {
         for (int i = 0; vars[i]; i++) {
             if (fp)
                 printf("export ");
-            printf("%s\n\r", vars[i]);
+            printf("%s\n", vars[i]);
         }
         mx_free_words(vars);
     }
