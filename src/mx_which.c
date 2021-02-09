@@ -100,7 +100,7 @@ void mx_which(t_shell *shell) {
                 break;
             }
         }
-        if (exists)
+        if (exists && !(which->a))
             continue;
         for (int j = 0; path_split[j]; j++) {
             dir = opendir(path_split[j]);
@@ -109,8 +109,9 @@ void mx_which(t_shell *shell) {
             while ((dirent = readdir(dir)) != 0) {
                 if (strcmp(dirent->d_name, words[i]) == 0 && words[i][0] != '.') {
                     exists = true;
-                    if (!which->s)
+                    if (!which->s){
                         printf("%s/%s\n", path_split[j], dirent->d_name);
+                    }
                     if (!which->a)
                         break;
                 }
@@ -121,19 +122,19 @@ void mx_which(t_shell *shell) {
         }
         if (!exists) {
             all_exists = false;
-            // if (!which->s)
+            if (!which->s)
                 fprintf(stderr, "%s not found\n", words[i]);
         }
     }
     if (all_exists) {
         shell->exit_code = EXIT_SUCCESS;
-        if (which->s){}
-            // printf("1\n");
+        if (which->s)
+            printf("1\n");
     }
     else {
         shell->exit_code = EXIT_FAILURE;
         if (which->s){}
-            // printf("0\n");
+            printf("0\n");
     }
     mx_free_words(words);
     mx_free_words(path_split);

@@ -8,12 +8,7 @@ static void setup(t_shell *shell) {
         while (tcgetpgrp(term) != (pgid = getpgrp()))
             kill(-pgid, SIGTTIN);
 
-        signal(SIGINT, SIG_IGN);
-        signal(SIGQUIT, SIG_IGN);
-        signal(SIGTSTP, SIG_IGN);
-        signal(SIGTTIN, SIG_IGN);
-        signal(SIGTTOU, SIG_IGN);
-        signal(SIGCHLD, SIG_IGN);
+        close_to_signals();
 
         pgid = getpid();
         if (setpgid (pgid, pgid) < 0) {

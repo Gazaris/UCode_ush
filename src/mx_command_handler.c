@@ -259,11 +259,7 @@ void mx_command_handler(t_shell *shell) {
                         char *fixed_line = strndup(shell->line, shell->line_len - 1);
                         *f = add_node(shell, pid, &fixed_line);
                         if (isatty(STDIN_FILENO)){  //Reacting to signals
-                            signal(SIGINT, SIG_DFL);
-                            signal(SIGQUIT, SIG_DFL);
-                            signal(SIGTSTP, SIG_DFL);
-                            signal(SIGTTIN, SIG_DFL);
-                            signal(SIGTTOU, SIG_DFL);
+                            open_to_signals();
                         }
                         printf("\033[2K");
                         functions[i](shell);
