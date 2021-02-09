@@ -27,6 +27,7 @@ typedef struct s_shell {
     int   carriage_pos;
     bool  new_line;
     bool  bg;
+    bool  give_env;
 
     int         *jobs_counter;
     int          job_max_number;

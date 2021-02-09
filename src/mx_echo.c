@@ -39,21 +39,21 @@ static void check_flags(char **word, t_echo *echo, int *flags) {
     }
 }
 
-static void env_var_handler(t_shell *shell, char **result, char *var) {
+static void env_var_handler(t_shell *shell, char **result, char **var) {
     char *var_value = NULL;
-    if (strcmp(var, "$") == 0) {
+    if (strcmp(*var, "$") == 0) {
         pid_t curr_id = getpid();
         var_value = mx_itoa(curr_id);
     }
-    else if (strcmp(var, "?") == 0) {
+    else if (strcmp(*var, "?") == 0) {
         var_value = mx_itoa(shell->exit_code);
     }
     else {
-        char *temp = getenv(var);
+        char *temp = getenv(*var);
         if (temp)
             var_value = strdup(temp);
     }
-    mx_strdel(&var);
+    mx_strdel(var);
     if (!var_value)
         return;
     *result = mx_strrejoin(*result, var_value);
@@ -78,20 +78,20 @@ void mx_echo(t_shell *shell) {
         free(echo);
         return;
     }
-    if (strcmp(words[flags + 1], "~") == 0 && !words[flags + 2]) {
-        printf("%s\n", getenv("HOME"));
-        mx_free_words(words);
-        free(echo);
-        return;
-    }
-    if (strcmp(words[flags + 1], "~+") == 0 && !words[flags + 2]) {
-        printf("%s\n", getenv("PWD"));
-        mx_free_words(words);
-        free(echo);
-        return;
-    }
-    if (strcmp(words[flags + 1], "~-") == 0 && !words[flags + 2]) {
-        printf("%s\n", getenv("OLDPWD"));
+    if (words[flags + 1][0] == '~' && !words[flags + 2]) {
+        char *temp = words[flags + 1];
+        temp++;
+        if (*temp == '+') {
+            printf("%s", getenv("PWD"));
+            temp++;
+        }
+        else if (*temp == '-') {
+            printf("%s", getenv("OLDPWD"));
+            temp++;
+        }
+        else
+            printf("%s", getenv("HOME"));
+        printf("%s\n", temp);
         mx_free_words(words);
         free(echo);
         return;
@@ -187,7 +187,8 @@ void mx_echo(t_shell *shell) {
                     }
                     else if (words[i][j + 1] != '}') {
                         dollar = false;
-                        env_var_handler(shell, &result, dollar_sequense);
+                        brace1 = 0, brace2 = 0;
+                        env_var_handler(shell, &result, &dollar_sequense);
                     }
                     continue;
                 }
@@ -208,6 +209,7 @@ void mx_echo(t_shell *shell) {
                         shell->new_line = false;
                         mx_command_handler(shell);
                         shell->new_line = true;
+                        bracket1 = 0, bracket2 = 0;
                         mx_strdel(&dollar_sequense);
                         dollar = false;
                     }
@@ -218,12 +220,14 @@ void mx_echo(t_shell *shell) {
                     dollar_sequense = mx_strrejoin(dollar_sequense, p);
                     if (!words[i][j + 1]) {
                         dollar = false;
-                        env_var_handler(shell, &result, dollar_sequense);
+                        env_var_handler(shell, &result, &dollar_sequense);
                         printable = true;
                     }
                     continue;
                 }
             }
+            if (backslash == 1)
+                backslash = 0;
             MX_C_TO_P(words[i][j], p);
             result = mx_strrejoin(result, p);
             printable = true;
@@ -245,11 +249,15 @@ void mx_echo(t_shell *shell) {
     if (!result)
         result = strdup("");
     printf("%s", result);
-    if (printable) {
-        if (echo->n)
+    if (echo->n) {
+        if (printable) {
             printf("%s%s%%%s", MX_BLACK_F, MX_WHITE_B, MX_RESET);
-        printf("\n");
+            printf("\n");
+        }
     }
+    else
+        if (shell->new_line)
+            printf("\n");
 
     mx_strdel(&result);
     mx_free_words(words);

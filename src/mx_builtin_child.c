@@ -54,17 +54,17 @@ bool check_path(char **arr, char *command, char **name) {
 
     while (arr[i] != NULL) {
         bin_exist = read_dir(arr[i], command_splitted[words_count], name);
-        if(bin_exist)
-        break;
+        if (bin_exist)
+            break;
         i++;
     }
     mx_free_words(command_splitted);
     return bin_exist;
 }
 
-void mx_builtin_child(char **job_path, char ***argv) {
+void mx_builtin_child(char **job_path, char ***argv, bool give_env) {
     extern char **environ;
-    execve(*job_path, *argv, environ);
+    execve(*job_path, *argv, give_env ? environ : NULL);
     free(*job_path);
     mx_free_words(*argv);
     exit(EXIT_FAILURE);

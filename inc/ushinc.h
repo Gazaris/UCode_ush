@@ -24,5 +24,4 @@
 #include <termios.h>
 #include <term.h>
 #include <unistd.h>
-#include <pthread.h>
 #include <sys/mman.h>

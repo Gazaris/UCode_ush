@@ -90,7 +90,7 @@ void mx_env(t_shell *shell) {
                 }
             }
             // env [utility [argument ...]]
-            if (eq == 0 && a == 1) {
+            if (eq == 0) {
                 mx_strdel(&shell->line);
                 for (int i = 1 + (int)env->i; words[i]; i++) {
                     for (int j = 0; words[i][j]; j++) {
@@ -101,10 +101,45 @@ void mx_env(t_shell *shell) {
                         shell->line = mx_strrejoin(shell->line, " ");
                 }
                 mx_free_words(words);
-                free(env);
+                char **env_copy = NULL;
+                extern char **environ;
+                bool extern_func = true;
+                if (env->i) {
+                    char *builtins[] = MX_BUILTINS_ARRAY;
+                    for (int i = 0; i < MX_BUILTINS_COUNT; i++)
+                        if (strcmp(shell->line, builtins[i]) == 0) {
+                            extern_func = false;
+                            break;
+                        }
+                    if (extern_func)
+                        shell->give_env = false;
+                    else {
+                        int size = 0;
+                        for (int i = 0; environ[i]; i++)
+                            size++;
+                        env_copy = malloc(sizeof(char*) * (size + 1));
+                        for (int i = 0; environ[i]; i++) {
+                            env_copy[i] = strdup(environ[i]);
+                            // char **words = mx_strsplit(environ[i], '=');
+                            // unsetenv(words[0]);
+                            // mx_free_words(words);
+                        }
+                        env_copy[size] = NULL;
+                        environ = NULL;
+                    }
+                }
                 shell->new_line = false;
                 mx_command_handler(shell);
                 shell->new_line = true;
+                if (env->i) {
+                    if (env_copy && !extern_func)
+                        for (int i = 0; env_copy[i]; i++)
+                            environ = env_copy;
+                    else if (extern_func)
+                        shell->give_env = true;
+                }
+                free(env);
+                shell->exit_code = EXIT_FAILURE;
                 return;
             }
             // env [name=value ...]
@@ -284,8 +319,33 @@ void mx_env(t_shell *shell) {
             shell->exit_code = EXIT_FAILURE;
             return;
         }
-        else {
+        else if (words_count == flags + 1) {
             output = true;
+        }
+        else if (words_count == flags + 2) {
+            char *temp = NULL;
+            bool bin_exist = read_dir(words[flags + 1], words[flags + 2], &temp);
+            mx_strdel(&temp);
+            if (bin_exist) {
+                mx_strdel(&shell->line);
+                shell->line = strdup(words[flags + 2]);
+                shell->new_line = false;
+                mx_command_handler(shell);
+                shell->new_line = true;
+                shell->exit_code = EXIT_FAILURE;
+                mx_free_words(new_vars);
+                mx_free_words(words);
+                free(env);
+                return;
+            }
+            else {
+                fprintf(stderr, "env: %s: No such file or directory\n", words[flags + 2]);
+                mx_free_words(new_vars);
+                mx_free_words(words);
+                free(env);
+                shell->exit_code = EXIT_FAILURE;
+                return;
+            }
         }
     }
     else if (env->u) {
@@ -300,10 +360,32 @@ void mx_env(t_shell *shell) {
             shell->exit_code = EXIT_FAILURE;
             return;
         }
-        else {
-            unsetted = getenv(words[words_count]);
-            unsetenv(words[words_count]);
+        else if (words_count == flags + 1) {
+            unsetted = getenv(words[flags + 1]);
+            unsetenv(words[flags + 1]);
             output = true;
+        }
+        else {
+            unsetted = getenv(words[flags + 1]);
+            unsetenv(words[flags + 1]);
+            mx_strdel(&shell->line);
+            for (int i = flags + 2; words[i]; i++) {
+                for (int j = 0; words[i][j]; j++) {
+                    MX_C_TO_P(words[i][j], p);
+                    shell->line = mx_strrejoin(shell->line, p);
+                }
+                if (words[i + 1])
+                    shell->line = mx_strrejoin(shell->line, " ");
+            }
+            shell->new_line = false;
+            mx_command_handler(shell);
+            shell->new_line = true;
+            shell->exit_code = EXIT_FAILURE;
+            setenv(words[flags + 1], unsetted, 1);
+            mx_free_words(new_vars);
+            mx_free_words(words);
+            free(env);
+            return;
         }
     }
     if (!words[1] || env->v) {

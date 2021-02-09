@@ -17,7 +17,7 @@ void mx_launch_other_builtin(t_shell *shell) {
         }
         else if (child_pid == 0){
             // open_to_signals();
-            mx_builtin_child(&job_path, &argv);
+            mx_builtin_child(&job_path, &argv, shell->give_env);
         }
         else {
             if (shell_is_interactive) {

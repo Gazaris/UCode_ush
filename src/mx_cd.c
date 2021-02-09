@@ -42,6 +42,7 @@ void mx_cd(t_shell *shell) {
     int backslash = 0;
     int quote = 0;
     bool end = false;
+    bool root = false;
 
     char p[2];
     for (int i = flags + 1; words[i] && !end; i++) {
@@ -104,6 +105,14 @@ void mx_cd(t_shell *shell) {
     if (!path_split) {
         path_split = malloc(sizeof(char**));
         path_split[0] = strdup("/");
+    }
+    else if (path[0] == '/') {
+        char *temp = strdup(path_split[0]);
+        mx_strdel(&path_split[0]);
+        path_split[0] = strdup("/");
+        path_split[0] = mx_strrejoin(path_split[0], temp);
+        mx_strdel(&temp);
+        root = true;
     }
     char *current_dir = getenv("PWD");
     char *destination = NULL;
@@ -202,11 +211,11 @@ void mx_cd(t_shell *shell) {
                 j = 1;
             }
             else {
-                if (i == 0) {
+                if (i == 0 && !root) {
                     destination = strdup(current_dir);
                 }
             }
-            if (strcmp(current_dir, "/") != 0)
+            if (strcmp(current_dir, "/") != 0 && !root)
                 destination = mx_strrejoin(destination, "/");
             // cd dir
             for (; path_split[i][j]; j++) {

@@ -4,7 +4,7 @@ bool mx_help_launch_builtin(t_shell *shell, char **job_path, char ***argv) {
     char *path = getenv("PATH");
     if (!path)
         return false;
-    char **arr = mx_strsplit(getenv("PATH"), ':');
+    char **arr = mx_strsplit(path, ':');
     char **words = mx_strsplit(shell->command_now, ' ');
     *argv = malloc(sizeof(char**));
     int words_count = 1;
@@ -70,7 +70,23 @@ bool mx_help_launch_builtin(t_shell *shell, char **job_path, char ***argv) {
     free(*argv);
     *argv = malloc(sizeof(char**) * words_count + 1);
     for (int k = 0; k < words_count; k++) {
-        (*argv)[k] = strdup(temp[k]);
+        if (temp[k][0] == '~') {
+            char *temp1 = temp[k];
+            temp1++;
+            if (*temp1 == '+') {
+                (*argv)[k] = mx_strrejoin((*argv)[k], getenv("PWD"));
+                temp1++;
+            }
+            else if (*temp1 == '-') {
+                (*argv)[k] = mx_strrejoin((*argv)[k], getenv("OLDPWD"));
+                temp1++;
+            }
+            else
+                (*argv)[k] = mx_strrejoin((*argv)[k], getenv("HOME"));
+            (*argv)[k] = mx_strrejoin((*argv)[k], temp1);
+        }
+        else
+            (*argv)[k] = strdup(temp[k]);
         free(temp[k]);
     }
     free(temp);

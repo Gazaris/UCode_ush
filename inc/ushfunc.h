@@ -33,7 +33,7 @@ char *mx_find_destination(char*, char*);
 void  mx_launch_other_builtin(t_shell*);
 void  mx_print_error(char*, char*);
 char  mx_get_type(struct stat);
-void  mx_builtin_child(char**, char***);
+void  mx_builtin_child(char**, char***, bool);
 bool mx_help_launch_builtin(t_shell*, char**, char***);
 char *get_error(char**, char*);
 bool read_dir(char*, char*, char**);
