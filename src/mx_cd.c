@@ -227,7 +227,6 @@ void mx_cd(t_shell *shell) {
 
     // char *destination = mx_find_destination(path, p);
 
-            printf("%s\n", destination);
     DIR *dir = opendir(destination);
     if (dir) {
         if (cd->P) {
