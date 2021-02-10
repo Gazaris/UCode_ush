@@ -27,7 +27,7 @@ static void delete_node(t_shell *shell, pid_t pid) {
                 p1->next = p2->next;
                 free(p2);
             }
-            else{ //if desired node is last
+            else { //if desired node is last
                 free(p2);
                 p1->next = NULL;
                 shell->job_max_number = p1->job_number;

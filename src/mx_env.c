@@ -105,12 +105,14 @@ void mx_env(t_shell *shell) {
                 extern char **environ;
                 bool extern_func = true;
                 if (env->i) {
-                    char *builtins[] = MX_BUILTINS_ARRAY;
-                    for (int i = 0; i < MX_BUILTINS_COUNT; i++)
-                        if (strcmp(shell->line, builtins[i]) == 0) {
-                            extern_func = false;
-                            break;
-                        }
+                    if (strcmp(shell->line, "env") && strcmp(shell->line, "export")) {
+                        char *builtins[] = MX_BUILTINS_ARRAY;
+                        for (int i = 0; i < MX_BUILTINS_COUNT; i++)
+                            if (strcmp(shell->line, builtins[i]) == 0) {
+                                extern_func = false;
+                                break;
+                            }
+                    }
                     if (extern_func)
                         shell->give_env = false;
                     else {
@@ -391,7 +393,7 @@ void mx_env(t_shell *shell) {
     if (!words[1] || env->v) {
         output = true;
     }
-    if (output) {
+    if (output && shell->give_env) {
         extern char **environ;
         int env_len = 0;
         for (; environ[env_len]; env_len++);

@@ -97,7 +97,6 @@ bool mx_help_launch_builtin(t_shell *shell, char **job_path, char ***argv) {
             (*argv)[k] = strdup(temp[k]);
         free(temp[k]);
     }
-    printf("%s\n", (*argv)[1]);
     free(temp);
     (*argv)[words_count] = NULL;
     mx_free_words(words);

@@ -256,8 +256,7 @@ void mx_echo(t_shell *shell) {
         }
     }
     else
-        if (shell->new_line)
-            printf("\n");
+        printf("\n");
 
     mx_strdel(&result);
     mx_free_words(words);
