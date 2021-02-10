@@ -25,6 +25,13 @@ bool mx_help_launch_builtin(t_shell *shell, char **job_path, char ***argv) {
                 }
                 continue;
             }
+            if (backslash == 2 || (quote == 1 && backslash == 1)) {
+                result = mx_strrejoin(result, "\\");
+                MX_C_TO_P(words[i][j], p);
+                result = mx_strrejoin(result, p);
+                backslash = 0;
+                continue;
+            }
             if (words[i][j] == '"' || words[i][j] == '\'') {
                 if (backslash == 1) {
                     MX_C_TO_P(words[i][j], p);
@@ -45,13 +52,13 @@ bool mx_help_launch_builtin(t_shell *shell, char **job_path, char ***argv) {
             backslash = 0;
         }
         else {
-            char **temp = malloc(sizeof(char**) * words_count + 1);
+            char **temp = malloc(sizeof(char**) * (words_count + 1));
             for (int k = 0; k < words_count; k++) {
                 temp[k] = strdup((*argv)[k]);
                 free((*argv)[k]);
             }
             free(*argv);
-            *argv = malloc(sizeof(char**) * words_count + 1);
+            *argv = malloc(sizeof(char**) * (words_count + 1));
             for (int k = 0; k < words_count; k++) {
                 (*argv)[k] = strdup(temp[k]);
                 free(temp[k]);
@@ -62,15 +69,16 @@ bool mx_help_launch_builtin(t_shell *shell, char **job_path, char ***argv) {
             words_count++;
         }
     }
-    char **temp = malloc(sizeof(char**) * words_count + 1);
+    char **temp = malloc(sizeof(char**) * (words_count + 1));
     for (int k = 0; k < words_count; k++) {
         temp[k] = strdup((*argv)[k]);
         free((*argv)[k]);
     }
     free(*argv);
-    *argv = malloc(sizeof(char**) * words_count + 1);
+    *argv = malloc(sizeof(char**) * (words_count + 1));
     for (int k = 0; k < words_count; k++) {
         if (temp[k][0] == '~') {
+            (*argv)[k] = NULL;
             char *temp1 = temp[k];
             temp1++;
             if (*temp1 == '+') {
@@ -89,6 +97,7 @@ bool mx_help_launch_builtin(t_shell *shell, char **job_path, char ***argv) {
             (*argv)[k] = strdup(temp[k]);
         free(temp[k]);
     }
+    printf("%s\n", (*argv)[1]);
     free(temp);
     (*argv)[words_count] = NULL;
     mx_free_words(words);
