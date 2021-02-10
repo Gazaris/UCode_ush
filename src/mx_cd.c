@@ -215,7 +215,7 @@ void mx_cd(t_shell *shell) {
                     destination = strdup(current_dir);
                 }
             }
-            if (strcmp(current_dir, "/") != 0 && !root)
+            if (strcmp(current_dir, "/") != 0 && !(root && !i))
                 destination = mx_strrejoin(destination, "/");
             // cd dir
             for (; path_split[i][j]; j++) {
@@ -227,6 +227,7 @@ void mx_cd(t_shell *shell) {
 
     // char *destination = mx_find_destination(path, p);
 
+            printf("%s\n", destination);
     DIR *dir = opendir(destination);
     if (dir) {
         if (cd->P) {
