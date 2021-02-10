@@ -167,58 +167,83 @@ void mx_echo(t_shell *shell) {
             }
             if (dollar) {
                 if (words[i][j] == '{') {
-                    brace1++;
+                    if (bracket1 == 0)
+                        brace1++;
+                    else {
+                        MX_C_TO_P(words[i][j], p);
+                        dollar_sequense = mx_strrejoin(dollar_sequense, p);
+                    }
                     continue;
                 }
                 else if (words[i][j] == '(') {
-                    bracket1++;
+                    if (bracket1 == 0)
+                        bracket1++;
+                    else {
+                        bracket1++;
+                        MX_C_TO_P(words[i][j], p);
+                        dollar_sequense = mx_strrejoin(dollar_sequense, p);
+                    }
                     continue;
                 }
                 else if (words[i][j] == '}') {
-                    brace2++;
-                    if (brace1 != brace2 && words[i][j + 1] != '}') {
-                        fprintf(stderr, "zsh: bad substitution\n");
-                        mx_strdel(&result);
-                        mx_strdel(&dollar_sequense);
-                        mx_free_words(words);
-                        free(echo);
-                        shell->exit_code = EXIT_FAILURE;
-                        return;
+                    if (bracket1 == 0) {
+                        brace2++;
+                        if (brace1 != brace2 && words[i][j + 1] != '}') {
+                            fprintf(stderr, "zsh: bad substitution\n");
+                            mx_strdel(&result);
+                            mx_strdel(&dollar_sequense);
+                            mx_free_words(words);
+                            free(echo);
+                            shell->exit_code = EXIT_FAILURE;
+                            return;
+                        }
+                        else if (words[i][j + 1] != '}') {
+                            dollar = false;
+                            brace1 = 0, brace2 = 0;
+                            env_var_handler(shell, &result, &dollar_sequense);
+                            printable = true;
+                        }
                     }
-                    else if (words[i][j + 1] != '}') {
-                        dollar = false;
-                        brace1 = 0, brace2 = 0;
-                        env_var_handler(shell, &result, &dollar_sequense);
+                    else {
+                        MX_C_TO_P(words[i][j], p);
+                        dollar_sequense = mx_strrejoin(dollar_sequense, p);
                     }
                     continue;
                 }
                 else if (words[i][j] == ')') {
                     bracket2++;
-                    if (bracket1 != bracket2 && words[i][j + 1] != ')') {
-                        fprintf(stderr, "ush: parse error near `)'\n");
-                        mx_strdel(&result);
-                        mx_strdel(&dollar_sequense);
-                        mx_free_words(words);
-                        free(echo);
-                        shell->exit_code = EXIT_FAILURE;
-                        return;
+                    if (bracket1 == 1) {
+                        if (bracket1 != bracket2) {
+                            fprintf(stderr, "ush: parse error near `)'\n");
+                            mx_strdel(&result);
+                            mx_strdel(&dollar_sequense);
+                            mx_free_words(words);
+                            free(echo);
+                            shell->exit_code = EXIT_FAILURE;
+                            return;
+                        }
+                        else if (words[i][j + 1] != ')') {
+                            mx_strdel(&shell->line);
+                            shell->line = strdup(dollar_sequense);
+                            shell->new_line = false;
+                            mx_command_handler(shell);
+                            shell->new_line = true;
+                            bracket1 = 0, bracket2 = 0;
+                            mx_strdel(&dollar_sequense);
+                            dollar = false;
+                        }
                     }
-                    else if (words[i][j + 1] != ')') {
-                        mx_strdel(&shell->line);
-                        shell->line = strdup(dollar_sequense);
-                        shell->new_line = false;
-                        mx_command_handler(shell);
-                        shell->new_line = true;
-                        bracket1 = 0, bracket2 = 0;
-                        mx_strdel(&dollar_sequense);
-                        dollar = false;
+                    else {
+                        bracket1--, bracket2--;
+                        MX_C_TO_P(words[i][j], p);
+                        dollar_sequense = mx_strrejoin(dollar_sequense, p);
                     }
                     continue;
                 }
                 else {
                     MX_C_TO_P(words[i][j], p);
                     dollar_sequense = mx_strrejoin(dollar_sequense, p);
-                    if (!words[i][j + 1]) {
+                    if (!words[i][j + 1] && !brace1 && !bracket1) {
                         dollar = false;
                         env_var_handler(shell, &result, &dollar_sequense);
                         printable = true;
@@ -235,7 +260,10 @@ void mx_echo(t_shell *shell) {
         if (words[i + 1]) {
             if (backslash == 1)
                 backslash = 0;
-            result = mx_strrejoin(result, " ");
+            if (dollar)
+                dollar_sequense = mx_strrejoin(dollar_sequense, " ");
+            else
+                result = mx_strrejoin(result, " ");
         }
     }
     if (quote % 2 != 0) {
@@ -250,13 +278,12 @@ void mx_echo(t_shell *shell) {
         result = strdup("");
     printf("%s", result);
     if (echo->n) {
-        if (printable) {
-            printf("%s%s%%%s", MX_BLACK_F, MX_WHITE_B, MX_RESET);
-            printf("\n");
-        }
+        if (printable && isatty(0))
+            printf("%s%s%%%s\n", MX_BLACK_F, MX_WHITE_B, MX_RESET);
     }
     else
-        printf("\n");
+        if (shell->new_line)
+            printf("\n");
 
     mx_strdel(&result);
     mx_free_words(words);
