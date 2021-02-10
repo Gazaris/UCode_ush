@@ -128,13 +128,13 @@ void mx_which(t_shell *shell) {
     }
     if (all_exists) {
         shell->exit_code = EXIT_SUCCESS;
-        if (which->s)
-            printf("1\n");
+        if (which->s) {}
+            // printf("1\n");
     }
     else {
         shell->exit_code = EXIT_FAILURE;
-        if (which->s){}
-            printf("0\n");
+        if (which->s) {}
+            // printf("0\n");
     }
     mx_free_words(words);
     mx_free_words(path_split);
