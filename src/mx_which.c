@@ -95,8 +95,14 @@ void mx_which(t_shell *shell) {
         for (int j = 0; j < MX_BUILTINS_COUNT; j++) {
             if (strcmp(words[i], builtins[j]) == 0) {
                 exists = true;
-                if (!which->s)
-                    fprintf(stderr, "%s: shell built-in command\n", words[i]);
+                if (!which->s) {
+                    if (!shell->buff_out)
+                        printf("%s: ush built-in command\n", words[i]);
+                    else {
+                        shell->buff_str = mx_strrejoin(shell->buff_str, words[i]);
+                        shell->buff_str = mx_strrejoin(shell->buff_str, ": ush built-in command\n");
+                    }
+                }
                 break;
             }
         }
@@ -109,8 +115,15 @@ void mx_which(t_shell *shell) {
             while ((dirent = readdir(dir)) != 0) {
                 if (strcmp(dirent->d_name, words[i]) == 0 && words[i][0] != '.') {
                     exists = true;
-                    if (!which->s){
-                        printf("%s/%s\n", path_split[j], dirent->d_name);
+                    if (!which->s) {
+                        if (!shell->buff_out)
+                            printf("%s/%s\n", path_split[j], dirent->d_name);
+                        else {
+                            shell->buff_str = mx_strrejoin(shell->buff_str, path_split[j]);
+                            shell->buff_str = mx_strrejoin(shell->buff_str, "/");
+                            shell->buff_str = mx_strrejoin(shell->buff_str, dirent->d_name);
+                            shell->buff_str = mx_strrejoin(shell->buff_str, "\n");
+                        }
                     }
                     if (!which->a)
                         break;
@@ -122,19 +135,21 @@ void mx_which(t_shell *shell) {
         }
         if (!exists) {
             all_exists = false;
-            if (!which->s)
-                fprintf(stderr, "%s not found\n", words[i]);
+            if (!which->s) {
+                if (!shell->buff_out)
+                    printf("%s not found\n", words[i]);
+                else {
+                    shell->buff_str = mx_strrejoin(shell->buff_str, words[i]);
+                    shell->buff_str = mx_strrejoin(shell->buff_str, " not found\n");
+                }
+            }
         }
     }
     if (all_exists) {
         shell->exit_code = EXIT_SUCCESS;
-        if (which->s) {}
-            // printf("1\n");
     }
     else {
         shell->exit_code = EXIT_FAILURE;
-        if (which->s) {}
-            // printf("0\n");
     }
     mx_free_words(words);
     mx_free_words(path_split);

@@ -98,6 +98,7 @@ t_shell *mx_shell_init() {
     shell->carriage_pos = 0;
     shell->new_line = true;
     shell->give_env = true;
+    shell->buff_out = false;
     //#########################################################################################################
 
     shell->exit_flag = EXIT_SUCCESS;

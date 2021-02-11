@@ -110,6 +110,7 @@ void mx_echo(t_shell *shell) {
     bool dollar = false;
     char *result = NULL;
     bool printable = false;
+    bool internal = shell->buff_out;
 
     char p[2];
     for (int i = flags + 1; words[i]; i++) {
@@ -225,9 +226,13 @@ void mx_echo(t_shell *shell) {
                         else if (words[i][j + 1] != ')') {
                             mx_strdel(&shell->line);
                             shell->line = strdup(dollar_sequense);
+                            shell->buff_out = true;
                             shell->new_line = false;
                             mx_command_handler(shell);
                             shell->new_line = true;
+                            result = mx_strrejoin(result, shell->buff_str);
+                            mx_strdel(&shell->buff_str);
+                            shell->buff_out = internal;
                             bracket1 = 0, bracket2 = 0;
                             mx_strdel(&dollar_sequense);
                             dollar = false;
@@ -276,9 +281,12 @@ void mx_echo(t_shell *shell) {
     }
     if (!result)
         result = strdup("");
-    printf("%s", result);
+    if (!shell->buff_out)
+        printf("%s", result);
+    else
+        shell->buff_str = strdup(result);
     if (echo->n) {
-        if (printable && isatty(0))
+        if (printable && isatty(0) && !shell->buff_out)
             printf("%s%s%%%s\n", MX_BLACK_F, MX_WHITE_B, MX_RESET);
     }
     else
