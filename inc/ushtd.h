@@ -28,8 +28,7 @@ typedef struct s_shell {
     bool  new_line;
     bool  bg;
     bool  give_env;
-    bool  buff_out;
-    char *buff_str;
+    bool  subecho;
 
     int         *jobs_counter;
     int          job_max_number;
