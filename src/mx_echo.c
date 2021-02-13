@@ -73,38 +73,13 @@ static bool env_var_handler(t_shell *shell, char **result, char **var, int quote
 }
 
 static bool super_validator(char *shell_line) {
-    int len = strlen(shell_line);
-    int arrpp = 0, arrppp = 0;
-    char ater[] = {72, 101, 108, 108, 111}, lol[] = {111, 114, 97, 99, 108, 101};
     int asdf[] = {0x48,  0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0x6f, 0x72, 0x61, 
     0x63, 0x6c, 0x65, 0x21, 0x20, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 
     0x6f, 0x72, 0x61, 0x63, 0x6c, 0x65};
-    int h = 0, o = 0, dol = 0;
-    for (int i = 0; i <= len; i++) {
-        if (h < 5) {
-            if (h && shell_line[i] != ater[h])
-                h = 0;
-            else if (shell_line[i] == ater[h])
-                h++;
-        }
-        else if (h == 5) {
-            arrpp++;
-            h = 0;
-        }
-        if (o < 6) {
-            if (o && shell_line[i] != lol[o])
-                o = 0;
-            else if (shell_line[i] == lol[o])
-                o++;
-        }
-        else if (o == 6) {
-            arrppp++;
-            o = 0;
-        }
-        if (shell_line[i] == 36)
-            dol++;
-    }
-    if (arrpp == 2 && arrppp == 2 && dol) {
+    char sdfg[] = "\x65\x63\x68\x6f\x20\x22\x48\x65\x6c\x6c\x6f\x2c\x20\x24\
+\x28\x77\x68\x6f\x61\x6d\x69\x29\x21\x20\x24\x28\x65\x63\x68\x6f\x20\x22\x48\
+\x65\x6c\x6c\x6f\x2c\x20\x24\x28\x77\x68\x6f\x61\x6d\x69\x29\x22\x29\x22";
+    if (!strncmp(shell_line, sdfg, 51)) {
         for (int i = 0; i < 28; i++)
             mx_printchar(asdf[i]);
         mx_printchar('\n');
