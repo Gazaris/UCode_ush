@@ -95,7 +95,7 @@ void mx_which(t_shell *shell) {
         for (int j = 0; j < MX_BUILTINS_COUNT; j++) {
             if (strcmp(words[i], builtins[j]) == 0) {
                 exists = true;
-                if (!which->s)
+                if (/*!which->s*/1)
                     printf("%s: ush built-in command\n", words[i]);
                 break;
             }
@@ -109,7 +109,7 @@ void mx_which(t_shell *shell) {
             while ((dirent = readdir(dir)) != 0) {
                 if (strcmp(dirent->d_name, words[i]) == 0 && words[i][0] != '.') {
                     exists = true;
-                    if (!which->s){
+                    if (/*!which->s*/1){
                         printf("%s/%s\n", path_split[j], dirent->d_name);
                     }
                     if (!which->a)

@@ -53,7 +53,9 @@ void mx_pwd(t_shell *shell) {
 
     if (pwd->P)
         var_value = realpath(var_value, NULL);
-    printf("%s\n", var_value);
+    printf("%s", var_value);
+    if (!shell->subecho)
+        printf("\n");
     mx_free_words(words);
     if (pwd->P)
         free(var_value);
